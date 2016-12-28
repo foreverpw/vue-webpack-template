@@ -16,16 +16,14 @@ module.exports = {
   },
   output: {
     path: config.build.assetsRoot,
-    publicPath: process.env.NODE_ENV === 'production' ? config.build.assetsPublicPath : config.dev.assetsPublicPath,
+    publicPath: process.env.NODE_ENV !== 'development' ? config.build.assetsPublicPath : config.dev.assetsPublicPath,
     filename: '[name].js'
   },
   resolve: {
     extensions: ['', '.js', '.vue', '.json'],
     fallback: [path.join(__dirname, '../node_modules')],
     alias: {
-      {{#if_eq build "standalone"}}
       'vue$': 'vue/dist/vue.common.js',
-      {{/if_eq}}
       'src': path.resolve(__dirname, '../src'),
       'assets': path.resolve(__dirname, '../src/assets'),
       'components': path.resolve(__dirname, '../src/components')
@@ -34,27 +32,18 @@ module.exports = {
   resolveLoader: {
     fallback: [path.join(__dirname, '../node_modules')]
   },
+  sassLoader: {
+    includePaths: [path.resolve(__dirname, "../node_modules/compass-mixins/lib")]
+  },
   module: {
-    {{#lint}}
-    preLoaders: [
-      {
-        test: /\.vue$/,
-        loader: 'eslint',
-        include: projectRoot,
-        exclude: /node_modules/
-      },
-      {
-        test: /\.js$/,
-        loader: 'eslint',
-        include: projectRoot,
-        exclude: /node_modules/
-      }
-    ],
-    {{/lint}}
     loaders: [
       {
         test: /\.vue$/,
         loader: 'vue'
+      },
+      {
+        test: /\.scss$/,
+        loaders: ["style-loader", "css-loader", "sass-loader"]
       },
       {
         test: /\.js$/,
@@ -84,11 +73,6 @@ module.exports = {
       }
     ]
   },
-  {{#lint}}
-  eslint: {
-    formatter: require('eslint-friendly-formatter')
-  },
-  {{/lint}}
   vue: {
     loaders: utils.cssLoaders({ sourceMap: useCssSourceMap }),
     postcss: [

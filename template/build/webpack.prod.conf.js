@@ -6,9 +6,22 @@ var merge = require('webpack-merge')
 var baseWebpackConfig = require('./webpack.base.conf')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
-var env = {{#if_or unit e2e}}process.env.NODE_ENV === 'testing'
+var env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
-  : {{/if_or}}config.build.env
+  : config.build.env
+
+var apiHost = '';
+switch (process.env.NODE_ENV) {
+  case 'testing':
+    apiHost = "'http://test.captain.useonline.cn/'"
+    break;
+  case 'production':
+    apiHost = "'http://captain.useonline.cn/'"
+    break;
+  default:
+    apiHost = "'http://captain.useonline.cn/'"
+    break;
+}
 
 var webpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -29,7 +42,8 @@ var webpackConfig = merge(baseWebpackConfig, {
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env
+      'process.env': env,
+      __HOST__:apiHost
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
@@ -43,9 +57,9 @@ var webpackConfig = merge(baseWebpackConfig, {
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
-      filename: {{#if_or unit e2e}}process.env.NODE_ENV === 'testing'
+      filename: process.env.NODE_ENV === 'testing'
         ? 'index.html'
-        : {{/if_or}}config.build.index,
+        : config.build.index,
       template: 'index.html',
       inject: true,
       minify: {
